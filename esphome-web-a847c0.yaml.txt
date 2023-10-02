@@ -1,0 +1,155 @@
+esphome:
+  name: esphome-web-a847c0
+  friendly_name: ESP32_CT_Clamp
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "Cge+P2bVUPMudoIpx0TGXdRyjUPRHJMH7MmDhiqn7bE="
+
+ota:
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-A847C0"
+    password: "9gx9iuUPqqMV"
+
+captive_portal:
+
+################################################################################################################
+
+
+sensor:
+#Sensor 1 - input 1
+   # The grid voltage entity from Home Assistant
+  - platform: homeassistant
+    name: "Grid Voltage Entity from Home Assistant"
+    entity_id: sensor.washing_machine_voltage
+    id: grid_voltage
+    internal: true
+
+  - platform: adc
+    pin: GPIO36
+    id: ESP32_CT1_adc_sensor
+    attenuation: 11db
+    name: "CT1 Volts"
+    update_interval: 1s
+    
+  - platform: ct_clamp
+    sensor: ESP32_CT1_adc_sensor
+    name: "CT 1 raw value"
+    id: "ESP32_CT1_raw"
+    update_interval: 5s
+    accuracy_decimals: 5
+   
+
+  - platform: ct_clamp
+    sensor: ESP32_CT1_adc_sensor
+    sample_duration: 300ms
+    name: "CT1 Electricity usage (amps)"
+    id: "ESP32_CT1_amps"
+    update_interval: 5s
+    accuracy_decimals: 2
+    filters:
+      - calibrate_linear:
+          - 0.004 -> 0
+          - 0.090 -> 8.53    # value as per power plug
+    
+  - platform: ct_clamp
+    sensor: ESP32_CT1_adc_sensor
+    sample_duration: 300ms
+    name: "CT1 Electricity usage (watt)"
+    id: "ESP32_CT1_watts"
+    update_interval: 5s
+    accuracy_decimals: 2
+    filters:
+      - calibrate_linear:
+          - 0.004 -> 0
+          - 0.090 -> 8.53    # value as per power plug
+      - lambda: return x * id(grid_voltage).state;
+    unit_of_measurement: "W" 
+
+  - platform: total_daily_energy        # This sensor will give you a Daily kW reading
+    name: "CT1 Total Daily Energy"
+    id: "ESP32_CT1_Total_daily_energy"
+    unit_of_measurement: 'kWh'
+    power_id: ESP32_CT1_watts
+    accuracy_decimals: 3
+    filters:
+      - lambda: return x / 1000;
+    device_class: energy
+
+########################################################################################################
+
+#Sensor 1 - input 1
+   # The grid voltage entity from Home Assistant
+
+  - platform: adc
+    pin: GPIO34
+    id: ESP32_CT2_adc_sensor
+    attenuation: 11db
+    name: "CT2 Volts"
+    update_interval: 1s
+    
+  - platform: ct_clamp
+    sensor: ESP32_CT2_adc_sensor
+    name: "CT2 raw value"
+    id: "ESP32_CT2_raw"
+    update_interval: 5s
+    accuracy_decimals: 5
+   
+
+  - platform: ct_clamp
+    sensor: ESP32_CT2_adc_sensor
+    sample_duration: 300ms
+    name: "CT2 Electricity usage (amps)"
+    id: "ESP32_CT2_amps"
+    update_interval: 5s
+    accuracy_decimals: 2
+    filters:
+      - calibrate_linear:
+          - 0.004 -> 0
+          - 0.090 -> 8.53    # value as per power plug
+    
+  - platform: ct_clamp
+    sensor: ESP32_CT2_adc_sensor
+    sample_duration: 300ms
+    name: "CT2 Electricity usage (watt)"
+    id: "ESP32_CT2_watts"
+    update_interval: 5s
+    accuracy_decimals: 2
+    filters:
+      - calibrate_linear:
+          - 0.004 -> 0
+          - 0.090 -> 8.53    # value as per power plug
+      - lambda: return x * id(grid_voltage).state;
+    unit_of_measurement: "W" 
+
+  - platform: total_daily_energy        # This sensor will give you a Daily kW reading
+    name: "CT2 Total Daily Energy"
+    id: "ESP32_CT2_Total_daily_energy"
+    unit_of_measurement: 'kWh'
+    power_id: ESP32_CT2_watts
+    accuracy_decimals: 3
+    filters:
+      - lambda: return x / 1000;
+    device_class: energy
+
+########################################################################################################
+    
+time:
+  - platform: sntp
+    id: my_time
