@@ -13,7 +13,7 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "Cge+P2bVUPMudoIpx0TGXdRyjUPRHJMH7MmDhiqn7bE="
+    key: 
 
 ota:
 
@@ -94,7 +94,7 @@ sensor:
 
 ########################################################################################################
 
-#Sensor 1 - input 1
+#Sensor 2 - input 2
    # The grid voltage entity from Home Assistant
 
   - platform: adc
